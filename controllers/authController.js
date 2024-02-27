@@ -1,42 +1,43 @@
 const Mentor = require('../models/Mentor');
 const Student = require('../models/Student');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // handle errors
 const handleErrors = (err) => {
   // console.log(err.message, err.code);
-  let errors = { email: '', password: '' };
+  let message = '';
 
   // incorrect email
   if (err.message === 'incorrect email') {
-    errors['email'] = 'Email is not registered';
+    message = 'Email is not registered';
   }
 
   // incorrect password
   if (err.message === 'incorrect password') {
-    errors['password'] = 'Password does not match';
+    message = 'Password does not match';
   }
 
   // duplicate email error
   if (err.code === 11000) {
-    errors['email'] = 'Email has been already registered.';
+    message = 'Email has been already registered.';
   }
 
   // validation errors
-  if (err.message.includes('user validation failed')) {
+  if (err.message.includes('User validation failed')) {
     Object.values(err.errors).forEach(({ properties }) => {
-      errors[properties.path] = properties.message;
+      message = properties.message;
     });
   }
 
-  return errors;
+  return message;
 };
 
 const maxAge = 3 * 24 * 60 * 60;
 
 // create token
 const createToken = (id) => {
-  return jwt.sign({ id }, 'net ninja pro max', {
+  return jwt.sign({ id }, process.env.JWT_KEY, {
     expiresIn: maxAge,
   });
 };
@@ -44,8 +45,6 @@ const createToken = (id) => {
 module.exports.student_signup = async (req, res) => {
   const { rollNo, name, email, password, phone, gender, year, branch, sec } =
     req.body;
-
-  console.log('roll: ', rollNo);
 
   try {
     const student = await Student.create({
@@ -61,10 +60,10 @@ module.exports.student_signup = async (req, res) => {
     });
     const token = createToken(student._id);
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(201).json({ student: student._id });
+    res.status(201).json({ success: true, studentId: student._id, token });
   } catch (err) {
-    const errors = handleErrors(err);
-    res.status(400).json({ errors });
+    const message = handleErrors(err);
+    res.status(400).json({ success: false, message });
   }
 };
 
@@ -75,10 +74,10 @@ module.exports.student_login = async (req, res) => {
     const student = await Student.login(email, password);
     const token = createToken(student._id);
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).json({ student: student._id });
+    res.status(200).json({ success: true, studentId: student._id, token });
   } catch (err) {
-    const errors = handleErrors(err);
-    res.status(400).json({ errors });
+    const message = handleErrors(err);
+    res.status(400).json({ success: false, message });
   }
 };
 module.exports.mentor_signup = async (req, res) => {
@@ -95,10 +94,10 @@ module.exports.mentor_signup = async (req, res) => {
     });
     const token = createToken(mentor._id);
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(201).json({ mentor: mentor._id });
+    res.status(201).json({ success: true, mentorId: mentor._id, token });
   } catch (err) {
-    const errors = handleErrors(err);
-    res.status(400).json({ errors });
+    const message = handleErrors(err);
+    res.status(400).json({ success: false, message });
   }
 };
 
@@ -109,10 +108,10 @@ module.exports.mentor_login = async (req, res) => {
     const mentor = await Mentor.login(email, password);
     const token = createToken(mentor._id);
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).json({ mentor: mentor._id });
+    res.status(200).json({ success: true, mentorId: mentor._id, token });
   } catch (err) {
-    const errors = handleErrors(err);
-    res.status(400).json({ errors });
+    const message = handleErrors(err);
+    res.status(400).json({ success: false, message });
   }
 };
 

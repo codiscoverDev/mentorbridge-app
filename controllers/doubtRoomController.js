@@ -81,6 +81,5 @@ const enrollStudent = async (req, res) => {
   }
 };
 
-module.exports = { enrollStudent };
 
 module.exports = { createDoubtRoom, enrollStudent };

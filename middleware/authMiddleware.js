@@ -1,20 +1,26 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/Student');
+require('dotenv').config();
 
 const requireAuth = (req, res, next) => {
   const token = req.cookies.jwt;
 
   // check json web token exist & is verfied
   if (token) {
-    jwt.verify(token, 'its new project 2023', (err, decodedToken) => {
+    jwt.verify(token, process.env.JWT_KEY, (err, decodedToken) => {
       if (err) {
-        res.redirect('/login');
+        res
+          .status(401)
+          .json({ success: false, message: 'Invalid token, Access denied' });
       } else {
+        req.id = decodedToken.id;
         next();
       }
     });
   } else {
-    res.redirect('/login');
+    res
+      .status(401)
+      .json({ success: false, message: 'Unauthorized, Token not provided' });
   }
 };
 
@@ -22,7 +28,7 @@ const requireAuth = (req, res, next) => {
 const checkUser = (req, res, next) => {
   const token = req.cookies.jwt;
   if (token) {
-    jwt.verify(token, 'its new project 2023', async (err, decodedToken) => {
+    jwt.verify(token, process.env.JWT_KEY, async (err, decodedToken) => {
       if (err) {
         res.locals.user = null;
         next();

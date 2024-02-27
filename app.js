@@ -8,7 +8,7 @@ const mentorRoutes = require('./routes/mentorRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
-const { requireAuth, checkUser } = require('./middleware/authMiddleware');
+const { requireAuth } = require('./middleware/authMiddleware');
 
 const port = 4488 || process.env.PORT;
 const dbURI = process.env.DB_URI;
@@ -45,12 +45,12 @@ mongoose
   .catch((err) => console.log(err));
 
 const apiRouter = express.Router();
-apiRouter.use('/auth', authRoutes);
 apiRouter.use('/doubtroom', doubtroomRoutes);
 apiRouter.use('/mentor', mentorRoutes);
 apiRouter.use('/student', studentRoutes);
 
-app.use('/api', apiRouter);
+app.use('/api/auth', authRoutes);
+app.use('/api', requireAuth, apiRouter);
 
 // Serve Swagger UI
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
