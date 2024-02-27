@@ -53,4 +53,4 @@ app.use('/api/auth', authRoutes);
 app.use('/api', requireAuth, apiRouter);
 
 // Serve Swagger UI
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
