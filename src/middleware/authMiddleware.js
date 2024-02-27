@@ -13,7 +13,7 @@ const requireAuth = (req, res, next) => {
           .status(401)
           .json({ success: false, message: 'Invalid token, Access denied' });
       } else {
-        req.id = decodedToken.id;
+        req.userId = decodedToken.id;
         next();
       }
     });

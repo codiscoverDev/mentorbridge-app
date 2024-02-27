@@ -1,62 +1,60 @@
 const mongoose = require('mongoose');
 
-const DoubtRoomSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Please enter name'],
-  },
-  mentorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Mentor',
-    required: true,
-  },
-  mentorName: {
-    type: String,
-    required: [true, 'Please enter Mentor name'],
-  },
-  topics: {
-    type: [String],
-    required: [true, 'At least one topic is required at the time of creation'],
-  },
-  subject: {
-    type: String,
-    required: true,
-  },
-  isActive: {
-    type: Boolean,
-    required: true,
-  },
-  enrolledStudentsId: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Student',
+const DoubtRoomSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Please enter name'],
     },
-  ],
-  enrollmentCount: {
-    type: Number,
-    default: 0,
+    mentorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Mentor',
+      required: true,
+    },
+    mentorName: {
+      type: String,
+      required: [true, 'Please enter Mentor name'],
+    },
+    topics: {
+      type: [String],
+      required: [
+        true,
+        'At least one topic is required at the time of creation',
+      ],
+    },
+    subject: {
+      type: String,
+      required: true,
+    },
+    isActive: {
+      type: Boolean,
+      required: true,
+    },
+    enrolledStudentsId: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Student',
+      },
+    ],
+    enrollmentCount: {
+      type: Number,
+      default: 0,
+    },
+    enrollmentDeadline: {
+      type: Date,
+      required: true,
+    },
+    venue: {
+      type: String,
+      required: true,
+    },
+    scheduledTime: {
+      type: Date,
+      required: true,
+    },
   },
-  enrollmentDeadline: {
-    type: Date,
-    required: true,
-  },
-  venue: {
-    type: String,
-    required: true,
-  },
-  scheduledTime: {
-    type: Date,
-    required: true,
-  },
-  modifiedAt: {
-    type: Date,
-    default: Date.now,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true }
+);
 
 // Middleware to increment enrollmentCount when a student enrolls
 // DoubtRoomSchema.pre('findOneAndUpdate', async function (next) {

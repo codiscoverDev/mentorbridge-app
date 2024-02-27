@@ -7,8 +7,10 @@ router.post('/student/signup', authController.student_signup);
 router.post('/mentor/login', authController.mentor_login);
 router.post('/mentor/signup', authController.mentor_signup);
 
-module.exports = router;
+router.post('/generate-otp', authController.generate_OTP);
+router.post('/verify-email', authController.verify_email);
 
+module.exports = router;
 
 /**
  * @swagger

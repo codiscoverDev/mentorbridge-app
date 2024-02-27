@@ -2,37 +2,44 @@ const mongoose = require('mongoose');
 const { isEmail } = require('validator');
 const bcrypt = require('bcrypt');
 
-const MentorSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Please enter name'],
+const MentorSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Please enter name'],
+    },
+    email: {
+      type: String,
+      required: [true, 'Please enter an email'],
+      unique: [true, 'Please enter unique email'],
+      lowercase: true,
+      validate: [isEmail, 'Please enter a valid email'],
+    },
+    password: {
+      type: String,
+      required: [true, 'Please enter a password'],
+      minlength: 6,
+    },
+    phone: {
+      type: Number,
+      required: [true, 'Please enter phone no'],
+      unique: [true, 'Please enter unique phone'],
+    },
+    gender: {
+      type: String,
+      required: [true, 'Please enter gender'],
+    },
+    department: {
+      type: String,
+      required: [true, 'Please enter department'],
+    },
+    verified: {
+      type: Boolean,
+      required: true,
+    },
   },
-  email: {
-    type: String,
-    required: [true, 'Please enter an email'],
-    unique: [true, 'Please enter unique email'],
-    lowercase: true,
-    validate: [isEmail, 'Please enter a valid email'],
-  },
-  password: {
-    type: String,
-    required: [true, 'Please enter a password'],
-    minlength: 6,
-  },
-  phone: {
-    type: Number,
-    required: [true, 'Please enter phone no'],
-    unique: [true, 'Please enter unique phone'],
-  },
-  gender: {
-    type: String,
-    required: [true, 'Please enter gender'],
-  },
-  department: {
-    type: String,
-    required: [true, 'Please enter department'],
-  },
-});
+  { timestamps: true }
+);
 
 // fire a function after a doc saved to db
 MentorSchema.post('save', function (doc, next) {
