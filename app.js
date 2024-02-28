@@ -33,10 +33,7 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
 mongoose
-  .connect(dbURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(dbURI, { useNewUrlParser: true })
   .then((result) => {
     app.listen(port);
     console.log(`Server is running on ${port}`);
