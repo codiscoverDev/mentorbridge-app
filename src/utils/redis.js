@@ -1,8 +1,18 @@
-const redis = require('redis');
-const { promisify } = require('util');
+const Redis = require('ioredis');
+require('dotenv').config();
 
-const client = redis.createClient();
-client.get = promisify(client.get).bind(client);
-client.setEx = promisify(client.setEx).bind(client);
+const { REDIS_HOST, REDIS_PORT, REDIS_USER, REDIS_PASS } = process.env;
+let redis;
+if (process.env.ENV === 'PROD') {
+  redis = new Redis({
+    host: REDIS_HOST,
+    port: REDIS_PORT,
+    username: REDIS_USER,
+    password: REDIS_PASS,
+  });
+} else {
+  redis = new Redis();
+}
+redis.connect(() => console.log('Redis connected'));
 
-module.exports = client;
+module.exports = redis;

@@ -1,25 +1,9 @@
 const Mentor = require('../models/Mentor');
 const Student = require('../models/Student');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
-const Redis = require('ioredis');
 const sendMail = require('../services/mailService');
-
-const { REDIS_HOST, REDIS_PORT, REDIS_TIMEOUT } = process.env;
-
-let redis;
-
-// Create a Redis instance
-(async () => {
-  redis = new Redis({
-    host: REDIS_HOST,
-    port: REDIS_PORT,
-    commandTimeout: REDIS_TIMEOUT,
-  });
-  redis.on('error', (err) => {
-    console.log(err);
-  });
-})();
+const redis = require('../utils/redis');
+require('dotenv').config();
 
 // handle errors
 const handleErrors = (err) => {
