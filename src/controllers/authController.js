@@ -125,8 +125,13 @@ const generate_OTP = async (req, res) => {
   const otp = Math.floor(100000 + Math.random() * 900000);
   const otpAge = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-  await redis.set(`otp:${userId}`, otp, 'EX', 600);
-  await redis.set(`otp:expire:${userId}`, otpAge, 'EX', 600);
+  try {
+    await redis.set(`otp:${userId}`, otp, 'EX', 600);
+    await redis.set(`otp:expire:${userId}`, otpAge, 'EX', 600);
+  } catch (err) {
+    console.error('Error setting OTP to redis: ', err);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 
   const mailSent = await sendMail(email, otp);
 
@@ -138,11 +143,15 @@ const generate_OTP = async (req, res) => {
 };
 
 const verify_email = async (req, res) => {
-  const { userId } = req;
-  const { userOTP } = req.body;
+  const { userId, userOTP } = req.body;
 
-  const otp = await redisClient.get(`otp:${userId}`);
-  const otpAge = await redisClient.get(`otp:expire:${userId}`);
+  try {
+    const otp = await redisClient.get(`otp:${userId}`);
+    const otpAge = await redisClient.get(`otp:expire:${userId}`);
+  } catch (error) {
+    console.error('Error getting OTP from redis: ', err);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 
   if (userOTP === otp && Date.now() < otpAge) {
     try {
