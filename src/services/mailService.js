@@ -89,7 +89,7 @@ const sendMail = async (email, otp, version) => {
           <h4>Hi there!</h4>
           <p>We're excited to have you on MentorBridge. Please verify your email by using the OTP provided below:</p>
           <div class="otp">
-            <h1>966045</h1>
+            <h1>${otp}</h1>
           </div>
           <p>This OTP will be valid for 10 minutes only. If you didn't request this, you can safely ignore this email.</p>
           <p><b>Best regards,</b><br>MentorBridge Team</p>
