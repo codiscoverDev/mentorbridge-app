@@ -122,23 +122,23 @@ const mentor_login = async (req, res) => {
 const generate_OTP = async (req, res) => {
   const { userId, email } = req.body;
 
-  const otp = Math.floor(100000 + Math.random() * 900000);
-  const otpAge = Date.now() + 10 * 60 * 1000; // 10 minutes
-
   try {
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otpAge = Date.now() + 10 * 60 * 1000; // 10 minutes
+
     await redis.set(`otp:${userId}`, otp, 'EX', 600);
     await redis.set(`otp:expire:${userId}`, otpAge, 'EX', 600);
-  } catch (err) {
-    console.error('Error setting OTP to redis: ', err);
+
+    const mailSent = await sendMail(email, otp);
+
+    if (mailSent) {
+      res.status(200).json({ success: true, message: 'OTP sent successfully' });
+    } else {
+      throw new Error('Error sending OTP');
+    }
+  } catch (error) {
+    console.error('Error in generate_OTP:', error.message);
     res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-
-  const mailSent = await sendMail(email, otp);
-
-  if (mailSent) {
-    res.status(200).json({ success: true, message: 'OTP sent successfully' });
-  } else {
-    res.status(500).json({ success: false, message: 'Error sending OTP' });
   }
 };
 
@@ -146,26 +146,22 @@ const verify_email = async (req, res) => {
   const { userId, userOTP } = req.body;
 
   try {
-    const otp = await redisClient.get(`otp:${userId}`);
-    const otpAge = await redisClient.get(`otp:expire:${userId}`);
-  } catch (error) {
-    console.error('Error getting OTP from redis: ', err);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
+    const otp = await redis.get(`otp:${userId}`);
+    const otpAge = await redis.get(`otp:expire:${userId}`);
 
-  if (userOTP === otp && Date.now() < otpAge) {
-    try {
+    if (userOTP === otp && Date.now() < otpAge) {
       await User.updateOne({ _id: userId }, { $set: { verified: true } });
       console.log('Email marked as verified for user:', userId);
       res.status(200).json({ message: 'Email verified successfully' });
-    } catch (error) {
-      console.error('Error marking email as verified:', error.message);
-      res.status(500).json({ message: 'Internal server error' });
+    } else {
+      res.status(401).json({ message: 'Invalid or expired OTP' });
     }
-  } else {
-    res.status(401).json({ message: 'Invalid or expired OTP' });
+  } catch (error) {
+    console.error('Error in verify_email:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 module.exports = {
   student_signup,
