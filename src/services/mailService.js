@@ -30,7 +30,7 @@ const sendMail = async (email, otp) => {
         console.error(`Email not sent: ${err}`);
         reject(err); // Reject the Promise if there's an error
       } else {
-        console.log(`Email sent: ${info.response}`);
+        console.log(`Email sent: ${info.response.slice(0, 26)}`);
         resolve(true); // Resolve the Promise if the email is sent successfully
       }
     });

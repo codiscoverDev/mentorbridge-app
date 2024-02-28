@@ -146,14 +146,17 @@ const generate_OTP = async (req, res) => {
 };
 
 const verify_email = async (req, res) => {
-  const { userId, userOTP } = req.body;
+  const { userId, userOTP, userType } = req.body;
 
   try {
     const otp = await redis.get(`otp:${userId}`);
     const otpAge = await redis.get(`otp:expire:${userId}`);
 
     if (userOTP === otp && Date.now() < otpAge) {
-      await User.updateOne({ _id: userId }, { $set: { verified: true } });
+      if (userType === 'student')
+        await Student.updateOne({ _id: userId }, { $set: { verified: true } });
+      if (userType === 'mentor')
+        await Mentor.updateOne({ _id: userId }, { $set: { verified: true } });
       console.log('Email marked as verified for user:', userId);
       res.status(200).json({ message: 'Email verified successfully' });
     } else {
