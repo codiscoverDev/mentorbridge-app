@@ -122,24 +122,27 @@ const mentor_login = async (req, res) => {
 const generate_OTP = async (req, res) => {
   const { userId, email } = req.body;
 
-  try {
     const otp = Math.floor(100000 + Math.random() * 900000);
     const otpAge = Date.now() + 10 * 60 * 1000; // 10 minutes
+    try {
+      await redis.set(`otp:${userId}`, otp, 'EX', 600);
+      await redis.set(`otp:expire:${userId}`, otpAge, 'EX', 600);
 
-    await redis.set(`otp:${userId}`, otp, 'EX', 600);
-    await redis.set(`otp:expire:${userId}`, otpAge, 'EX', 600);
+      const mailSent = await sendMail(email, otp);
 
-    const mailSent = await sendMail(email, otp);
-
-    if (mailSent) {
-      res.status(200).json({ success: true, message: 'OTP sent successfully' });
-    } else {
-      throw new Error('Error sending OTP');
+      if (mailSent) {
+        res
+          .status(200)
+          .json({ success: true, message: 'OTP sent successfully' });
+      } else {
+        throw new Error('Error sending OTP');
+      }
+    } catch (error) {
+      console.error('Error in generate_OTP:', error.message);
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
     }
-  } catch (error) {
-    console.error('Error in generate_OTP:', error.message);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
 };
 
 const verify_email = async (req, res) => {

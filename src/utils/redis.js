@@ -1,39 +1,29 @@
 const Redis = require('ioredis');
 require('dotenv').config();
+const { ENV, REDIS_URL } = process.env;
 
-const connectToRedis = async () => {
-  try {
-    const redis = new Redis(process.env.REDIS_URL, {
-      connectionName: 'mentorbridge-cache',
-      maxRetriesPerRequest: 5,
-      connectTimeout: 5000,
-    });
-
-    redis.on('connect', () => {
-      console.log('Connected to Redis');
-    });
-
-    redis.on('error', (err) => {
-      console.error('Redis Error:', err.message);
-      throw err;
-    });
-
-    return redis;
-  } catch (err) {
-    console.error('Error in Redis connection:', err);
-    throw err;
-  }
-};
 let redis;
-(async () => {
-  redis = await connectToRedis();
-})();
+if (ENV === 'PROD') {
+  redis = new Redis(REDIS_URL, {
+    connectionName: 'mentorbridge-cache',
+    maxRetriesPerRequest: 5,
+    connectTimeout: 5000,
+  });
+} else {
+  redis = new Redis();
+}
+redis.on('connect', () => {
+  console.log('Connected to Redis');
+});
 
-module.exports = async () => {
-  if (!redis) {
-    console.warn(
-      'Redis instance not yet connected. Please wait for initialization.'
-    );
-  }
-  return redis;
-};
+// Handle error events
+redis.on('error', (err) => {
+  console.error('Redis Error:', err.message);
+});
+
+// Handle reconnection
+redis.on('reconnecting', (delay, attempt) => {
+  console.log(`Reconnecting to Redis... [Attempt: ${attempt}]`);
+});
+
+module.exports = redis;
