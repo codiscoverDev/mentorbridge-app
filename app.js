@@ -33,7 +33,7 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
 mongoose
-  .connect(dbURI, { useNewUrlParser: true })
+  .connect(dbURI)
   .then((result) => {
     app.listen(port);
     console.log(`Server is running on ${port}`);
@@ -61,6 +61,9 @@ app.get('/', (req, res) => {
       <br><br><br><button><a href="/api-docs">Visit API DOCS</a></button>
   </body>
   </html>`);
+});
+app.get('/ping', (req, res) => {
+  res.status(200).json({ message: 'Pong' });
 });
 // Serve Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
