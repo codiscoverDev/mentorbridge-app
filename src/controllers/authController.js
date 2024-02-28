@@ -122,31 +122,27 @@ const mentor_login = async (req, res) => {
 const generate_OTP = async (req, res) => {
   const { userId, email } = req.body;
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    const otpAge = Date.now() + 10 * 60 * 1000; // 10 minutes
-    try {
-      await redis.set(`otp:${userId}`, otp, 'EX', 600);
-      await redis.set(`otp:expire:${userId}`, otpAge, 'EX', 600);
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  const otpAge = Date.now() + 10 * 60 * 1000; // 10 minutes
+  try {
+    await redis.set(`otp:${userId}`, otp, 'EX', 600);
+    await redis.set(`otp:expire:${userId}`, otpAge, 'EX', 600);
 
-      const mailSent = await sendMail(email, otp);
+    const mailSent = await sendMail(email, otp, 'verifyOTP');
 
-      if (mailSent) {
-        res
-          .status(200)
-          .json({ success: true, message: 'OTP sent successfully' });
-      } else {
-        throw new Error('Error sending OTP');
-      }
-    } catch (error) {
-      console.error('Error in generate_OTP:', error.message);
-      res
-        .status(500)
-        .json({ success: false, message: 'Internal server error' });
+    if (mailSent) {
+      res.status(200).json({ success: true, message: 'OTP sent successfully' });
+    } else {
+      throw new Error('Error sending OTP');
     }
+  } catch (error) {
+    console.error('Error in generate_OTP:', error.message);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 };
 
 const verify_email = async (req, res) => {
-  const { userId, userOTP, userType } = req.body;
+  const { userId, email, userOTP, userType } = req.body;
 
   try {
     const otp = await redis.get(`otp:${userId}`);
@@ -158,6 +154,13 @@ const verify_email = async (req, res) => {
       if (userType === 'mentor')
         await Mentor.updateOne({ _id: userId }, { $set: { verified: true } });
       console.log('Email marked as verified for user:', userId);
+      const mailSent = await sendMail(email, otp, 'OTPConfirmation');
+
+      if (mailSent) {
+        console.log('OTP Confirmation email sent successfully');
+      } else {
+        console.error('OTP Confirmation email not sent');
+      }
       res.status(200).json({ message: 'Email verified successfully' });
     } else {
       res.status(401).json({ message: 'Invalid or expired OTP' });
