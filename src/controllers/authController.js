@@ -19,17 +19,16 @@ const handleErrors = (err) => {
   if (err.message === 'incorrect password') {
     message = 'Password does not match';
   }
+  if (
+    err.message.includes('student validation failed') ||
+    err.message.includes('mentor validation failed')
+  ) {
+    message = 'Please enter valid input';
+  }
 
   // duplicate email error
   if (err.code === 11000) {
     message = 'Email has been already registered.';
-  }
-
-  // validation errors
-  if (err.message.includes('User validation failed')) {
-    Object.values(err.errors).forEach(({ properties }) => {
-      message = properties.message;
-    });
   }
 
   return message;
@@ -84,6 +83,7 @@ const student_login = async (req, res) => {
   }
 };
 const mentor_signup = async (req, res) => {
+  console.log('Running m signup');
   const { name, email, password, phone, gender, department } = req.body;
 
   try {
@@ -100,7 +100,8 @@ const mentor_signup = async (req, res) => {
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
     res.status(201).json({ success: true, mentorId: mentor._id, token });
   } catch (err) {
-    const message = handleErrors(err);
+    let message = handleErrors(err);
+    if (!message) message = 'Something went wrong!';
     res.status(400).json({ success: false, message });
   }
 };
@@ -120,13 +121,13 @@ const mentor_login = async (req, res) => {
 };
 
 const generate_OTP = async (req, res) => {
-  const { userId, email } = req.body;
+  const { email } = req.body;
 
   const otp = Math.floor(100000 + Math.random() * 900000);
   const otpAge = Date.now() + 10 * 60 * 1000; // 10 minutes
   try {
-    await redis.set(`otp:${userId}`, otp, 'EX', 600);
-    await redis.set(`otp:expire:${userId}`, otpAge, 'EX', 600);
+    await redis.set(`otp:${email}`, otp, 'EX', 600);
+    await redis.set(`otp:expire:${email}`, otpAge, 'EX', 600);
 
     const mailSent = await sendMail(email, otp, 'verifyOTP');
 
@@ -142,18 +143,18 @@ const generate_OTP = async (req, res) => {
 };
 
 const verify_email = async (req, res) => {
-  const { userId, email, userOTP, userType } = req.body;
+  const { email, userOTP, userType } = req.body;
 
   try {
-    const otp = await redis.get(`otp:${userId}`);
-    const otpAge = await redis.get(`otp:expire:${userId}`);
+    const otp = await redis.get(`otp:${email}`);
+    const otpAge = await redis.get(`otp:expire:${email}`);
 
     if (userOTP === otp && Date.now() < otpAge) {
       if (userType === 'student')
-        await Student.updateOne({ _id: userId }, { $set: { verified: true } });
+        await Student.updateOne({ email: email }, { $set: { verified: true } });
       if (userType === 'mentor')
-        await Mentor.updateOne({ _id: userId }, { $set: { verified: true } });
-      console.log('Email marked as verified for user:', userId);
+        await Mentor.updateOne({ email: email }, { $set: { verified: true } });
+      console.log('Email marked as verified for a user:', userType);
       const mailSent = await sendMail(email, otp, 'OTPConfirmation');
 
       if (mailSent) {
@@ -161,13 +162,17 @@ const verify_email = async (req, res) => {
       } else {
         console.error('OTP Confirmation email not sent');
       }
-      res.status(200).json({ message: 'Email verified successfully' });
+      res
+        .status(200)
+        .json({ success: true, message: 'Email verified successfully' });
     } else {
-      res.status(401).json({ message: 'Invalid or expired OTP' });
+      res
+        .status(401)
+        .json({ success: false, message: 'Invalid or expired OTP' });
     }
   } catch (error) {
     console.error('Error in verify_email:', error.message);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 

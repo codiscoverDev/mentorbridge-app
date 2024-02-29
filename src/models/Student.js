@@ -61,16 +61,16 @@ const StudentSchema = new mongoose.Schema(
 );
 
 // fire a function after a doc saved to db
-StudentSchema.post('save', function (doc, next) {
-  console.log('New user was created and Saved');
-  next();
-});
+// StudentSchema.post('save', function (doc, next) {
+//   // console.log('New user was created and Saved');
+//   next();
+// });
 
 // fire a function before a doc saved to db
 StudentSchema.pre('save', async function (next) {
   const salt = await bcrypt.genSalt();
   this.password = await bcrypt.hash(this.password, salt);
-  console.log('User is about to be created and saved');
+  // console.log('User is about to be created and saved');
   next();
 });
 
