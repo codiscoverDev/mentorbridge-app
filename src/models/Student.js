@@ -4,10 +4,21 @@ const bcrypt = require('bcrypt');
 
 const StudentSchema = new mongoose.Schema(
   {
+    username: {
+      type: String,
+      unique: true,
+      required: [true, 'Please enter a username'],
+      minlength: 3,
+      maxlength: 12,
+      validate: {
+        validator: (value) => /^[a-zA-Z0-9_]+$/.test(value),
+        message:
+          'Invalid characters in username. Use only letters, numbers, and underscores.',
+      },
+    },
     rollNo: {
       type: String,
       required: [true, 'Please enter a roll no'],
-      unique: [true, 'Please enter a password'],
     },
     name: {
       type: String,
@@ -68,8 +79,12 @@ const StudentSchema = new mongoose.Schema(
 
 // fire a function before a doc saved to db
 StudentSchema.pre('save', async function (next) {
-  const salt = await bcrypt.genSalt();
-  this.password = await bcrypt.hash(this.password, salt);
+  try {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+  } catch (err) {
+    console.error('Error before saving student data: ', err.message);
+  }
   // console.log('User is about to be created and saved');
   next();
 });

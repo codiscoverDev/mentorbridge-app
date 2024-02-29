@@ -3,6 +3,7 @@ const Student = require('../models/Student');
 const jwt = require('jsonwebtoken');
 const sendMail = require('../services/mailService');
 const redis = require('../utils/redis');
+const { generateUsername } = require('../utils/helpers');
 require('dotenv').config();
 
 // handle errors
@@ -48,7 +49,9 @@ const student_signup = async (req, res) => {
     req.body;
 
   try {
+    const username = await generateUsername(name, email);
     const student = await Student.create({
+      username,
       rollNo,
       name,
       email,
@@ -83,11 +86,12 @@ const student_login = async (req, res) => {
   }
 };
 const mentor_signup = async (req, res) => {
-  console.log('Running m signup');
   const { name, email, password, phone, gender, department } = req.body;
 
   try {
+    const username = await generateUsername(name, email);
     const mentor = await Mentor.create({
+      username,
       name,
       email,
       password,

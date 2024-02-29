@@ -4,6 +4,18 @@ const bcrypt = require('bcrypt');
 
 const MentorSchema = new mongoose.Schema(
   {
+    username: {
+      type: String,
+      unique: true,
+      required: [true, 'Please enter a username'],
+      minlength: 3,
+      maxlength: 12,
+      validate: {
+        validator: (value) => /^[a-zA-Z0-9_]+$/.test(value),
+        message:
+          'Invalid username. Use only letters, numbers, and underscores.',
+      },
+    },
     name: {
       type: String,
       required: [true, 'Please enter name'],
@@ -49,8 +61,12 @@ const MentorSchema = new mongoose.Schema(
 
 // fire a function before a doc saved to db
 MentorSchema.pre('save', async function (next) {
-  const salt = await bcrypt.genSalt();
-  this.password = await bcrypt.hash(this.password, salt);
+  try {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+  } catch (err) {
+    console.error('Error before saving mentor data: ', err.message);
+  }
   // console.log('User is about to be created and saved');
   next();
 });
