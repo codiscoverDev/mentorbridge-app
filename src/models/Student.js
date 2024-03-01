@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
 const bcrypt = require('bcrypt');
+const { formatStudent } = require('../utils/formatter');
 
 const StudentSchema = new mongoose.Schema(
   {
@@ -68,8 +69,24 @@ const StudentSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform: (doc, ret) => {
+        ret.id = ret._id.toString();
+        formatStudent(ret);
+      },
+    },
+  }
 );
+
+// StudentSchema.set('toJSON', {
+//   transform: function (doc, ret) {
+//     ret.id = ret._id;
+//     delete ret._id;
+//     delete ret.__v;
+//   },
+// });
 
 // fire a function after a doc saved to db
 // StudentSchema.post('save', function (doc, next) {
@@ -83,7 +100,7 @@ StudentSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(this.password, salt);
   } catch (err) {
-    console.error('Error before saving student data: ', err.message);
+    console.error('Error before saving student data: ', err);
   }
   // console.log('User is about to be created and saved');
   next();
@@ -100,6 +117,22 @@ StudentSchema.statics.login = async function (email, password) {
     throw Error('incorrect password');
   }
   throw Error('incorrect email');
+};
+
+StudentSchema.statics.getStudent = async function (body) {
+  const { id, email, username } = body;
+  let student;
+  if (id) {
+    student = await Student.findById(id);
+  } else if (email) {
+    student = await Student.findOne({ email });
+  } else if (username) {
+    student = await Student.findOne({ username });
+  }
+  if (student) {
+    return student.toJSON();
+  }
+  throw Error('Student not found');
 };
 
 const Student = mongoose.model('student', StudentSchema);

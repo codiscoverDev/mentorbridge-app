@@ -1,5 +1,24 @@
 const Mentor = require('../models/Mentor');
-const Student = require('../models/Student');
+
+const getMentor = async (req, res) => {
+  try {
+    let mentor = await Mentor.getMentor(req.body);
+    res.status(200).json({ success: true, mentor });
+  } catch (err) {
+    if (err.message === 'Mentor not found') {
+      res.status(404).json({
+        success: false,
+        message: err.message,
+      });
+    } else {
+      console.error('Error while Mentor.getMentor: ', err.message);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  }
+};
 
 const searchMentors = async (req, res) => {
   try {
@@ -30,7 +49,7 @@ const followMentor = async (req, res) => {
     const { studentId, mentorId } = req.body;
 
     // Update the student's following array with the mentorId
-    await Student.findByIdAndUpdate(studentId, {
+    await Mentor.findByIdAndUpdate(studentId, {
       $addToSet: { following: mentorId },
     });
 
@@ -75,4 +94,4 @@ const getMentorById = async (req, res) => {
   }
 };
 
-module.exports = { searchMentors, followMentor, getMentorById };
+module.exports = { getMentor, searchMentors, followMentor, getMentorById };

@@ -68,7 +68,14 @@ const student_signup = async (req, res) => {
     res.status(201).json({ success: true, studentId: student._id, token });
   } catch (err) {
     const message = handleErrors(err);
-    res.status(400).json({ success: false, message });
+    if (!message) {
+      console.error('Error while student signup: ', err.message);
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
+    } else {
+      res.status(400).json({ success: false, message });
+    }
   }
 };
 
@@ -82,7 +89,14 @@ const student_login = async (req, res) => {
     res.status(200).json({ success: true, studentId: student._id, token });
   } catch (err) {
     const message = handleErrors(err);
-    res.status(400).json({ success: false, message });
+    if (!message) {
+      console.error('Error while student login: ', err.message);
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
+    } else {
+      res.status(400).json({ success: false, message });
+    }
   }
 };
 const mentor_signup = async (req, res) => {
@@ -104,9 +118,15 @@ const mentor_signup = async (req, res) => {
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
     res.status(201).json({ success: true, mentorId: mentor._id, token });
   } catch (err) {
-    let message = handleErrors(err);
-    if (!message) message = 'Something went wrong!';
-    res.status(400).json({ success: false, message });
+    const message = handleErrors(err);
+    if (!message) {
+      console.error('Error while mentor signup: ', err.message);
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
+    } else {
+      res.status(400).json({ success: false, message });
+    }
   }
 };
 
@@ -120,7 +140,14 @@ const mentor_login = async (req, res) => {
     res.status(200).json({ success: true, mentorId: mentor._id, token });
   } catch (err) {
     const message = handleErrors(err);
-    res.status(400).json({ success: false, message });
+    if (!message) {
+      console.error('Error while mentor login: ', err.message);
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
+    } else {
+      res.status(400).json({ success: false, message });
+    }
   }
 };
 
@@ -140,9 +167,11 @@ const generate_OTP = async (req, res) => {
     } else {
       throw new Error('Error sending OTP');
     }
-  } catch (error) {
-    console.error('Error in generate_OTP:', error.message);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+  } catch (err) {
+    console.error('Error in generate_OTP:', err.message);
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error error' });
   }
 };
 
@@ -174,9 +203,11 @@ const verify_email = async (req, res) => {
         .status(401)
         .json({ success: false, message: 'Invalid or expired OTP' });
     }
-  } catch (error) {
-    console.error('Error in verify_email:', error.message);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+  } catch (err) {
+    console.error('Error in verify_email:', err.message);
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error error' });
   }
 };
 

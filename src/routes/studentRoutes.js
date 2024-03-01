@@ -1,8 +1,7 @@
 const { Router } = require('express');
+const studentController = require('../controllers/studentController');
 const router = Router();
 
-// router.get('/mentor/search/:name', mentorController.searchMentors);
-// router.get('/mentor/:id', mentorController.getMentorById);
-// router.post('/mentor/follow', mentorController.followMentor);
+router.get('/', studentController.getStudent);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
 const bcrypt = require('bcrypt');
+const { formatStudent } = require('../utils/formatter');
 
 const MentorSchema = new mongoose.Schema(
   {
@@ -50,7 +51,15 @@ const MentorSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform: (doc, ret) => {
+        ret.id = ret._id.toString();
+        formatStudent(ret);
+      },
+    },
+  }
 );
 
 // fire a function after a doc saved to db
@@ -82,6 +91,22 @@ MentorSchema.statics.login = async function (email, password) {
     throw Error('incorrect password');
   }
   throw Error('incorrect email');
+};
+
+MentorSchema.statics.getMentor = async function (body) {
+  const { id, email, username } = body;
+  let mentor;
+  if (id) {
+    mentor = await Mentor.findById(id);
+  } else if (email) {
+    mentor = await Mentor.findOne({ email });
+  } else if (username) {
+    mentor = await Mentor.findOne({ username });
+  }
+  if (mentor) {
+    return mentor.toJSON();
+  }
+  throw Error('Mentor not found');
 };
 
 const Mentor = mongoose.model('mentor', MentorSchema);
