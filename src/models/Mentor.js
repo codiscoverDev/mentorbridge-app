@@ -8,7 +8,7 @@ const MentorSchema = new mongoose.Schema(
     username: {
       type: String,
       unique: true,
-      required: [true, 'Please enter a username'],
+      required: [true, 'a username'],
       minlength: 3,
       maxlength: 20,
       validate: {
@@ -19,32 +19,36 @@ const MentorSchema = new mongoose.Schema(
     },
     name: {
       type: String,
-      required: [true, 'Please enter name'],
+      required: [true, 'name'],
     },
     email: {
       type: String,
-      required: [true, 'Please enter an email'],
-      unique: [true, 'Please enter unique email'],
-      lowercase: true,
-      validate: [isEmail, 'Please enter a valid email'],
+      required: [true, 'email'],
+      unique: [true, 'unique email'],
+      lowercase: [true, 'lowercase email'],
+      validate: [isEmail, 'valid email'],
     },
     password: {
       type: String,
-      required: [true, 'Please enter a password'],
-      minlength: 6,
+      required: [true, 'password'],
+      minlength: [8, 'strong password (min length: 8)'],
     },
     phone: {
       type: Number,
-      required: [true, 'Please enter phone no'],
-      unique: [true, 'Please enter unique phone'],
+      required: [true, 'phone no'],
+      unique: [true, 'unique phone'],
+      validate: {
+        validator: (value) => /^\d{10}$/.test(value),
+        message: 'valid phone no',
+      },
     },
     gender: {
       type: String,
-      required: [true, 'Please enter gender'],
+      required: [true, 'gender'],
     },
     department: {
       type: String,
-      required: [true, 'Please enter department'],
+      required: [true, 'department'],
     },
     verified: {
       type: Boolean,

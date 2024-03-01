@@ -29,6 +29,7 @@ const generateUsername = async (name, email) => {
     '029',
     '_dreamer',
   ];
+  name = name.toString();
   const baseName = name.replace(/\s+/g, '_');
   let username = email
     .split('@')[0]

@@ -8,55 +8,59 @@ const StudentSchema = new mongoose.Schema(
     username: {
       type: String,
       unique: true,
-      required: [true, 'Please enter a username'],
+      required: [true, 'a username'],
       minlength: 3,
       maxlength: 20,
       validate: {
         validator: (value) => /^[a-zA-Z0-9_]+$/.test(value),
         message:
-          'Invalid characters in username. Use only letters, numbers, and underscores.',
+          'Invalid username. Use only letters, numbers, and underscores.',
       },
     },
     rollNo: {
       type: String,
-      required: [true, 'Please enter a roll no'],
+      required: [true, 'roll no'],
     },
     name: {
       type: String,
-      required: [true, 'Please enter name'],
+      required: [true, 'name'],
     },
     email: {
       type: String,
-      required: [true, 'Please enter an email'],
-      unique: [true, 'Please enter unique email'],
-      lowercase: true,
-      validate: [isEmail, 'Please enter a valid email'],
+      required: [true, 'email'],
+      unique: [true, 'unique email'],
+      lowercase: [true, 'lowercase email'],
+      validate: [isEmail, 'valid email'],
     },
     password: {
       type: String,
-      required: [true, 'Please enter a password'],
-      minlength: 6,
+      required: [true, 'valid password'],
+      minlength: [8, 'strong password (min length: 8)'],
     },
     phone: {
       type: Number,
-      required: [true, 'Please enter phone no'],
-      unique: [true, 'Please enter unique phone'],
+      required: [true, 'phone no'],
+      unique: [true, 'unique phone'],
+      validate: {
+        validator: (value) => /^\d{10}$/.test(value),
+        message: 'valid phone no',
+      },
     },
     gender: {
       type: String,
-      required: [true, 'Please enter gender'],
+      required: [true, 'gender'],
     },
     year: {
       type: String,
-      required: [true, 'Please enter year'],
+      required: [true, 'year'],
     },
     branch: {
       type: String,
-      required: [true, 'Please enter branch'],
+      required: [true, 'branch'],
     },
     sec: {
       type: String,
-      required: [true, 'Please enter name'],
+      required: [true, 'name'],
     },
     following: [
       {

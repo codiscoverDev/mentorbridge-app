@@ -10,7 +10,6 @@ require('dotenv').config();
 const handleErrors = (err) => {
   // console.log(err.message, err.code);
   let message = '';
-  console.log(err);
 
   // incorrect email
   if (err.message === 'incorrect email') {
@@ -21,14 +20,8 @@ const handleErrors = (err) => {
   if (err.message === 'incorrect password') {
     message = 'Password does not match';
   }
-  if (
-    err.message.includes('student validation failed') ||
-    err.message.includes('mentor validation failed')
-  ) {
-    message = 'Please enter valid input';
-  }
 
-  // duplicate email error
+  // duplicate email, phone, username error
   if (err.code === 11000) {
     if (err.keyPattern.email) {
       message = 'Email has been already registered';
@@ -38,7 +31,18 @@ const handleErrors = (err) => {
       message = 'Username is not available';
     }
   }
-
+  if (!message) {
+    if (
+      err.message.includes('student validation failed') ||
+      err.message.includes('mentor validation failed')
+    ) {
+      message = 'Please enter ';
+      Object.values(err.errors).forEach(({ properties }) => {
+        if (properties.message) message += properties.message + ', ';
+      });
+      message = message.slice(0, message.lastIndexOf(', '));
+    }
+  }
   return message;
 };
 
