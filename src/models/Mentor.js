@@ -10,7 +10,7 @@ const MentorSchema = new mongoose.Schema(
       unique: true,
       required: [true, 'Please enter a username'],
       minlength: 3,
-      maxlength: 12,
+      maxlength: 20,
       validate: {
         validator: (value) => /^[a-zA-Z0-9_]+$/.test(value),
         message:

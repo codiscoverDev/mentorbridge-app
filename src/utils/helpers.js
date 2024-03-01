@@ -1,6 +1,8 @@
 const Student = require('../models/Student');
 
 const generateUsername = async (name, email) => {
+  const minLen = 3;
+  const maxLen = 20;
   const suffix = [
     '_',
     '_official',
@@ -27,38 +29,40 @@ const generateUsername = async (name, email) => {
     '029',
     '_dreamer',
   ];
-  const baseName = name.toLowerCase().replace(/\s+/g, '_');
+  const baseName = name.replace(/\s+/g, '_');
   let username = email
     .split('@')[0]
     .replace(/-/g, '_')
     .replace(/[^\w-]+/g, '');
-  if (username.length > 12) {
-    username = username.slice(0, 12);
-  }
   let isUnique = false;
   let i = -1;
   while (!isUnique) {
+    username = username.toLowerCase();
     const existingUser = await Student.findOne({ username });
     if (!existingUser) {
       isUnique = true;
     } else {
       if (i === -1) {
         username = baseName;
-        if (baseName.length > 12) {
-          username = baseName.slice(0, 12);
-        }
       }
       if (i > 22) {
-        username = baseName.slice(0, 6) + Math.floor(Math.random() * 10000);
+        username =
+          baseName.slice(0, maxLen - 6) + Math.floor(Math.random() * 10000);
       }
       if (i % 2 === 0) {
         username = baseName + suffix[i];
-      } else {
+      } else if (i > 0) {
         username = name.split(' ')[0] + suffix[i];
       }
       i++;
     }
   }
+  if (username.length > maxLen) {
+    username = username.slice(0, maxLen);
+  } else if (username.length < minLen) {
+    username += Math.floor(Math.random() * 10000);
+  }
+  username = username.toLowerCase();
   return username;
 };
 

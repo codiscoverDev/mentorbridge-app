@@ -10,6 +10,7 @@ require('dotenv').config();
 const handleErrors = (err) => {
   // console.log(err.message, err.code);
   let message = '';
+  console.log(err);
 
   // incorrect email
   if (err.message === 'incorrect email') {
@@ -29,7 +30,13 @@ const handleErrors = (err) => {
 
   // duplicate email error
   if (err.code === 11000) {
-    message = 'Email has been already registered.';
+    if (err.keyPattern.email) {
+      message = 'Email has been already registered';
+    } else if (err.keyPattern.phone) {
+      message = 'Phone number has been already registered';
+    } else if (err.keyPattern.username) {
+      message = 'Username is not available';
+    }
   }
 
   return message;
