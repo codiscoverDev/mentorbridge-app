@@ -141,8 +141,7 @@ StudentSchema.statics.getStudent = async function (params) {
     } else if (username) {
       
       student = await Student.findOne({ username });
-    }
-if(!id || !email || !username ){
+    }else{
 throw new Error('Please provide id or email or username');
 }
     console.log('\n-------------------\n', student.name);
