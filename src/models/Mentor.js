@@ -101,20 +101,26 @@ MentorSchema.statics.login = async function (email, password) {
   throw Error('incorrect email');
 };
 
-MentorSchema.statics.getMentor = async function (body) {
-  const { id, email, username } = body;
+MentorSchema.statics.getMentor = async function (query) {
+  const { id, email, username } = query;
   let mentor;
-  if (id) {
-    mentor = await Mentor.findById(id);
-  } else if (email) {
-    mentor = await Mentor.findOne({ email });
-  } else if (username) {
-    mentor = await Mentor.findOne({ username });
+  try {
+    if (id) {
+      mentor = await Mentor.findById(id);
+    } else if (email) {
+      mentor = await Mentor.findOne({ email });
+    } else if (username) {
+      mentor = await Mentor.findOne({ username });
+    } else {
+      throw new Error('Please provide id or email or username');
+    }
+    if (mentor) {
+      return mentor.toJSON();
+    }
+    throw Error('Mentor not found');
+  } catch (error) {
+    throw error;
   }
-  if (mentor) {
-    return mentor.toJSON();
-  }
-  throw Error('Mentor not found');
 };
 
 const Mentor = mongoose.model('mentor', MentorSchema);

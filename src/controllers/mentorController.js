@@ -2,10 +2,11 @@ const Mentor = require('../models/Mentor');
 
 const getMentor = async (req, res) => {
   try {
-    let mentor = await Mentor.getMentor(req.body);
+    let mentor = await Mentor.getMentor(req.query);
     res.status(200).json({ success: true, mentor });
   } catch (err) {
-    if (err.message === 'Mentor not found') {
+    if (err.message === 'Mentor not found' ||
+    err.message === 'Please provide id or email or username') {
       res.status(404).json({
         success: false,
         message: err.message,

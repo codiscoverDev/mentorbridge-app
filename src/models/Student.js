@@ -128,28 +128,27 @@ StudentSchema.statics.login = async function (email, password) {
 };
 
 StudentSchema.statics.getStudent = async function (query) {
-  try {
-    const { id, email, username } = query;
-    console.log('\n\n ID: ', id, ',\nEmail: ', email, ',\nUsername', username);
-    let student;
 
-    if (id) {
-      student = await Student.findById(id);
-    } else if (email) {
-      student = await Student.findOne({ email });
-    } else if (username) {
-      student = await Student.findOne({ username });
-    } else {
-      throw new Error('Please provide id or email or username');
+    const { id, email, username } = query;
+    let student;
+    try {
+      if (id) {
+        student = await Student.findById(id);
+      } else if (email) {
+        student = await Student.findOne({ email });
+      } else if (username) {
+        student = await Student.findOne({ username });
+      } else {
+        throw new Error('Please provide id or email or username');
+      }
+      if (student) {
+        return student.toJSON();
+      } else {
+        throw new Error('Student not found');
+      }
+    } catch (error) {
+      throw error;
     }
-    if (student) {
-      return student.toJSON();
-    } else {
-      throw new Error('Student not found');
-    }
-  } catch (error) {
-    throw error;
-  }
 };
 
 const Student = mongoose.model('student', StudentSchema);
