@@ -130,6 +130,7 @@ StudentSchema.statics.login = async function (email, password) {
 StudentSchema.statics.getStudent = async function (params) {
   try {
     const { id, email, username } = params;
+console.log('\n\n ID: ',id,' Email: ', email, 'Username', username);
     let student;
 
     if (id) {
