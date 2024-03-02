@@ -15,6 +15,7 @@ const dbURI = process.env.DB_URI;
 
 const app = express();
 
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
