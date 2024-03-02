@@ -3,8 +3,10 @@ const User = require('../models/Student');
 require('dotenv').config();
 
 const requireAuth = (req, res, next) => {
-  const token = req.cookies.jwt || req.headers['access-token'];
-  console.log('Token => ', token);
+  let token = req.headers['access-token'];
+  if (!token) {
+    token = req.cookies.jwt;
+  }
 
   // check json web token exist & is verfied
   if (token) {

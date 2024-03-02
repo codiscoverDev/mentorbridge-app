@@ -128,21 +128,32 @@ StudentSchema.statics.login = async function (email, password) {
 };
 
 StudentSchema.statics.getStudent = async function (body) {
-  const { id, email, username } = body;
-  let student;
-  if (id) {
-    student = await Student.findById(id);
-  } else if (email) {
-    student = await Student.findOne({ email });
-  } else if (username) {
-    student = await Student.findOne({ username });
+  try {
+    const { id, email, username } = body;
+    let student;
+
+    if (id) {
+      console.log('Email ------> ', email);
+      student = await Student.findById(id);
+    } else if (email) {
+      console.log('Email ------> ', email);
+      student = await Student.findOne({ email });
+    } else if (username) {
+      console.log('Email ------> ', email);
+      student = await Student.findOne({ username });
+    }
+    console.log('\n-------------------\n', student);
+    if (student) {
+      return student.toJSON();
+    } else {
+      throw new Error('Student not found');
+    }
+  } catch (error) {
+    console.error('[Static Function]: \tError in getStudent:', error.message);
+    throw error;
   }
-  console.log('\n-------------------\n', student);
-  if (student) {
-    return student.toJSON();
-  }
-  throw Error('Student not found');
 };
+
 
 const Student = mongoose.model('student', StudentSchema);
 module.exports = Student;
