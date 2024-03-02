@@ -1,6 +1,10 @@
 const Redis = require('ioredis');
+const Student = require('../models/Student');
+const Mentor = require('../models/Mentor');
 require('dotenv').config();
 const { ENV, REDIS_URL } = process.env;
+
+const TTL = 7200;
 
 let redis;
 if (ENV === 'PROD') {
@@ -26,4 +30,53 @@ redis.on('reconnecting', (delay, attempt) => {
   console.log(`Reconnecting to Redis... [Attempt: ${attempt}]`);
 });
 
-module.exports = redis;
+const getCachedStudent = async (query) => {
+  const cacheKey = `student:${JSON.stringify(query)}`;
+  let cachedData = await redis.get(cacheKey);
+  if (cachedData) {
+    if (query.id) {
+      return JSON.parse(cachedData);
+    } else {
+      cachedData = await redis.get(cachedData);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+    }
+  }
+  const student = await Student.getStudent(query);
+  const studentIdKey = `student:{"id":"${student.id}"}`;
+  await redis.setex(studentIdKey, TTL, JSON.stringify(student));
+  await redis.setex(`student:{"email":"${student.email}"}`, TTL, studentIdKey);
+  await redis.setex(
+    `student:{"username":"${student.username}"}`,
+    TTL,
+    studentIdKey
+  );
+  return student;
+};
+const getCachedMentor = async (query) => {
+  const cacheKey = `mentor:${JSON.stringify(query)}`;
+  let cachedData = await redis.get(cacheKey);
+  if (cachedData) {
+    if (query.id) {
+      return JSON.parse(cachedData);
+    } else {
+      cachedData = await redis.get(cachedData);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+    }
+  }
+  const mentor = await Mentor.getMentor(query);
+  const mentorIdKey = `mentor:{"id":"${mentor.id}"}`;
+  await redis.setex(mentorIdKey, TTL, JSON.stringify(mentor));
+  await redis.setex(`mentor:{"email":"${mentor.email}"}`, TTL, mentorIdKey);
+  await redis.setex(
+    `mentor:{"username":"${mentor.username}"}`,
+    TTL,
+    mentorIdKey
+  );
+  return mentor;
+};
+
+module.exports = { redis, getCachedStudent, getCachedMentor };

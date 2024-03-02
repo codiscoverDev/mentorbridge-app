@@ -2,8 +2,8 @@ const Mentor = require('../models/Mentor');
 const Student = require('../models/Student');
 const jwt = require('jsonwebtoken');
 const sendMail = require('../services/mailService');
-const redis = require('../utils/redis');
 const { generateUsername } = require('../utils/helpers');
+const { redis } = require('../utils/redis');
 require('dotenv').config();
 
 // handle errors

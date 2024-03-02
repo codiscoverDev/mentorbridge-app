@@ -1,8 +1,9 @@
-const Student = require('../models/Student');
+const { getCachedStudent } = require('../utils/redis');
 
 const getStudent = async (req, res) => {
   try {
-    let student = await Student.getStudent(req.query);
+    let student = await getCachedStudent(req.query);
+    res.setHeader('Cache-Control', 'private, max-age=60');
     res.status(200).json({ success: true, student });
   } catch (err) {
     if (
