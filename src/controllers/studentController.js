@@ -5,6 +5,7 @@ const getStudent = async (req, res) => {
     let student = await Student.getStudent(req.body);
     res.status(200).json({ success: true, student });
   } catch (err) {
+    console.error(err);
     if (err.message === 'Student not found') {
       res.status(404).json({
         success: false,

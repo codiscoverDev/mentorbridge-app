@@ -17,6 +17,10 @@ const MentorSchema = new mongoose.Schema(
           'Invalid username. Use only letters, numbers, and underscores.',
       },
     },
+    userType: {
+      type: String,
+      default: 'mentor',
+    },
     name: {
       type: String,
       required: [true, 'name'],

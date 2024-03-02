@@ -17,6 +17,10 @@ const StudentSchema = new mongoose.Schema(
           'Invalid username. Use only letters, numbers, and underscores.',
       },
     },
+    userType: {
+      type: String,
+      default: 'student',
+    },
     rollNo: {
       type: String,
       required: [true, 'roll no'],
@@ -133,6 +137,7 @@ StudentSchema.statics.getStudent = async function (body) {
   } else if (username) {
     student = await Student.findOne({ username });
   }
+  console.log('\n-------------------\n', student);
   if (student) {
     return student.toJSON();
   }
