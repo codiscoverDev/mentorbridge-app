@@ -127,22 +127,25 @@ StudentSchema.statics.login = async function (email, password) {
   throw Error('incorrect email');
 };
 
-StudentSchema.statics.getStudent = async function (body) {
+StudentSchema.statics.getStudent = async function (params) {
   try {
-    const { id, email, username } = body;
+    const { id, email, username } = params;
     let student;
 
     if (id) {
-      console.log('Email ------> ', email);
+
       student = await Student.findById(id);
     } else if (email) {
-      console.log('Email ------> ', email);
+      
       student = await Student.findOne({ email });
     } else if (username) {
-      console.log('Email ------> ', email);
+      
       student = await Student.findOne({ username });
     }
-    console.log('\n-------------------\n', student);
+if(!id || !email || !username ){
+throw new Error('Please provide id or email or username');
+}
+    console.log('\n-------------------\n', student.name);
     if (student) {
       return student.toJSON();
     } else {
