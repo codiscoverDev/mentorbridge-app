@@ -1,4 +1,7 @@
 const Student = require('../models/Student');
+const Mentor = require('../models/Mentor');
+const { redis } = require('../utils/redis');
+const searchTTL = 600;
 
 const generateUsername = async (name, email) => {
   const minLen = 3;
@@ -67,4 +70,52 @@ const generateUsername = async (name, email) => {
   return username;
 };
 
-module.exports = { generateUsername };
+const searchStudents = async (q) => {
+  try {
+    const cacheKey = `studentSearch:${q}`;
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) return JSON.parse(cachedData);
+    const students = await Student.find({
+      $or: [
+        { username: { $regex: `.*${q}.*`, $options: 'i' } },
+        { name: { $regex: `.*${q}.*`, $options: 'i' } },
+        { email: { $regex: `.*${q}.*`, $options: 'i' } },
+        { rollNo: { $regex: `.*${q}.*`, $options: 'i' } },
+      ],
+    }).sort({
+      username: -1,
+      name: -1,
+      email: -1,
+    });
+    redis.setex(cacheKey, searchTTL, JSON.stringify(students));
+
+    return students;
+  } catch (err) {
+    throw err;
+  }
+};
+const searchMentors = async (q) => {
+  try {
+    const cacheKey = `mentorSearch:${q}`;
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) return JSON.parse(cachedData);
+    const mentors = await Mentor.find({
+      $or: [
+        { username: { $regex: `.*${q}.*`, $options: 'i' } },
+        { name: { $regex: `.*${q}.*`, $options: 'i' } },
+        { email: { $regex: `.*${q}.*`, $options: 'i' } },
+        { department: { $regex: `.*${q}.*`, $options: 'i' } },
+      ],
+    }).sort({
+      username: -1,
+      name: -1,
+      email: -1,
+    });
+    redis.setex(cacheKey, searchTTL, JSON.stringify(mentors));
+    return mentors;
+  } catch (err) {
+    throw err;
+  }
+};
+
+module.exports = { generateUsername, searchStudents, searchMentors };

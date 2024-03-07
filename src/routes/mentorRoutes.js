@@ -3,7 +3,7 @@ const mentorController = require('../controllers/mentorController');
 const router = Router();
 
 router.get('/', mentorController.getMentor);
-router.get('/search/:name', mentorController.searchMentors);
+// router.get('/search/:name', mentorController.searchMentors);
 router.get('/:id', mentorController.getMentorById);
 router.post('/follow', mentorController.followMentor);
 

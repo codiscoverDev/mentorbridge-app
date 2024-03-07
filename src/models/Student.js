@@ -16,6 +16,7 @@ const StudentSchema = new mongoose.Schema(
         message:
           'Invalid username. Use only letters, numbers, and underscores.',
       },
+      index: true,
     },
     userType: {
       type: String,
@@ -24,10 +25,12 @@ const StudentSchema = new mongoose.Schema(
     rollNo: {
       type: String,
       required: [true, 'roll no'],
+      index: true,
     },
     name: {
       type: String,
       required: [true, 'name'],
+      index: true,
     },
     email: {
       type: String,
@@ -35,6 +38,7 @@ const StudentSchema = new mongoose.Schema(
       unique: [true, 'unique email'],
       lowercase: [true, 'lowercase email'],
       validate: [isEmail, 'valid email'],
+      index: true,
     },
     password: {
       type: String,

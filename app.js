@@ -6,9 +6,12 @@ const authRoutes = require('./src/routes/authRoutes');
 const doubtroomRoutes = require('./src/routes/doubtroomRoutes');
 const mentorRoutes = require('./src/routes/mentorRoutes');
 const studentRoutes = require('./src/routes/studentRoutes');
+const searchRoutes = require('./src/routes/searchRoutes');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const { requireAuth } = require('./src/middleware/authMiddleware');
+const Student = require('./src/models/Student');
+const Mentor = require('./src/models/Mentor');
 
 const port = 4488 || process.env.PORT;
 const dbURI = process.env.DB_URI;
@@ -32,9 +35,13 @@ const swaggerOptions = {
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
-
+async function ensureIndexes() {
+  await Student.ensureIndexes();
+  await Mentor.ensureIndexes();
+}
 mongoose
   .connect(dbURI)
+  .then(() => ensureIndexes())
   .then((result) => {
     app.listen(port);
     console.log(`Server is running on ${port}`);
@@ -45,6 +52,7 @@ const apiRouter = express.Router();
 apiRouter.use('/doubtroom', doubtroomRoutes);
 apiRouter.use('/mentor', mentorRoutes);
 apiRouter.use('/student', studentRoutes);
+apiRouter.use('/search', searchRoutes);
 
 app.use('/api/auth', authRoutes);
 app.use('/api', requireAuth, apiRouter);

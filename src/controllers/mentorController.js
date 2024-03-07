@@ -25,28 +25,28 @@ const getMentor = async (req, res) => {
   }
 };
 
-const searchMentors = async (req, res) => {
-  try {
-    const { name } = req.params;
+// const searchMentors = async (req, res) => {
+//   try {
+//     const { name } = req.params;
 
-    // Using a regular expression for a case-insensitive search
-    const mentors = await Mentor.find({
-      name: { $regex: new RegExp(name, 'i') },
-    });
+//     // Using a regular expression for a case-insensitive search
+//     const mentors = await Mentor.find({
+//       name: { $regex: new RegExp(name, 'i') },
+//     });
 
-    res.json({
-      success: true,
-      message: 'Mentors found successfully',
-      data: mentors,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-    });
-  }
-};
+//     res.json({
+//       success: true,
+//       message: 'Mentors found successfully',
+//       data: mentors,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Internal server error',
+//     });
+//   }
+// };
 // Controller function to follow a mentor
 
 const followMentor = async (req, res) => {
@@ -99,4 +99,4 @@ const getMentorById = async (req, res) => {
   }
 };
 
-module.exports = { getMentor, searchMentors, followMentor, getMentorById };
+module.exports = { getMentor, followMentor, getMentorById };

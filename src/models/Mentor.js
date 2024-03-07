@@ -16,6 +16,7 @@ const MentorSchema = new mongoose.Schema(
         message:
           'Invalid username. Use only letters, numbers, and underscores.',
       },
+      index: true,
     },
     userType: {
       type: String,
@@ -24,6 +25,7 @@ const MentorSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, 'name'],
+      index: true,
     },
     email: {
       type: String,
@@ -31,6 +33,7 @@ const MentorSchema = new mongoose.Schema(
       unique: [true, 'unique email'],
       lowercase: [true, 'lowercase email'],
       validate: [isEmail, 'valid email'],
+      index: true,
     },
     password: {
       type: String,
@@ -53,6 +56,7 @@ const MentorSchema = new mongoose.Schema(
     department: {
       type: String,
       required: [true, 'department'],
+      index: true,
     },
     verified: {
       type: Boolean,

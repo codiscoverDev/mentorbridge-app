@@ -30,6 +30,7 @@ redis.on('reconnecting', (delay, attempt) => {
   console.log(`Reconnecting to Redis... [Attempt: ${attempt}]`);
 });
 
+
 const getCachedStudent = async (query) => {
   const cacheKey = `student:${JSON.stringify(query)}`;
   let cachedData = await redis.get(cacheKey);
