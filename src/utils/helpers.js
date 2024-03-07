@@ -1,7 +1,7 @@
 const Student = require('../models/Student');
 const Mentor = require('../models/Mentor');
 const { redis } = require('../utils/redis');
-const searchTTL = 0;
+const searchTTL = 900;
 
 const generateUsername = async (name, email) => {
   const minLen = 3;
