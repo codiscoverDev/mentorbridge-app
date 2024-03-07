@@ -1,7 +1,7 @@
 const Student = require('../models/Student');
 const Mentor = require('../models/Mentor');
 const { redis } = require('../utils/redis');
-const searchTTL = 600;
+const searchTTL = 0;
 
 const generateUsername = async (name, email) => {
   const minLen = 3;
@@ -77,15 +77,17 @@ const searchStudents = async (q) => {
     if (cachedData) return JSON.parse(cachedData);
     const students = await Student.find({
       $or: [
-        { username: { $regex: `.*${q}.*`, $options: 'i' } },
-        { name: { $regex: `.*${q}.*`, $options: 'i' } },
-        { email: { $regex: `.*${q}.*`, $options: 'i' } },
-        { rollNo: { $regex: `.*${q}.*`, $options: 'i' } },
+        {
+          username: { $regex: `^${q}`, $options: 'i' },
+        },
+        { name: { $regex: `.*?${q}.*?`, $options: 'i' } },
+        { email: { $regex: `^${q}`, $options: 'i' } },
+        { rollNo: { $regex: `^${q}`, $options: 'i' } },
+        { branch: { $regex: `\\b${q}\\b`, $options: 'i' } },
       ],
     }).sort({
-      username: -1,
       name: -1,
-      email: -1,
+      username: -1,
     });
     redis.setex(cacheKey, searchTTL, JSON.stringify(students));
 
@@ -101,15 +103,21 @@ const searchMentors = async (q) => {
     if (cachedData) return JSON.parse(cachedData);
     const mentors = await Mentor.find({
       $or: [
-        { username: { $regex: `.*${q}.*`, $options: 'i' } },
-        { name: { $regex: `.*${q}.*`, $options: 'i' } },
-        { email: { $regex: `.*${q}.*`, $options: 'i' } },
-        { department: { $regex: `.*${q}.*`, $options: 'i' } },
+        {
+          username: { $regex: `^${q}`, $options: 'i' },
+        },
+        { name: { $regex: `.*?${q}.*?`, $options: 'i' } },
+        { email: { $regex: `^${q}`, $options: 'i' } },
+        {
+          department: {
+            $regex: `\\b${q}\\b`,
+            $options: 'i',
+          },
+        },
       ],
     }).sort({
-      username: -1,
       name: -1,
-      email: -1,
+      username: -1,
     });
     redis.setex(cacheKey, searchTTL, JSON.stringify(mentors));
     return mentors;

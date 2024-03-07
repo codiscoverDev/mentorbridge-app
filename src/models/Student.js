@@ -65,6 +65,7 @@ const StudentSchema = new mongoose.Schema(
     branch: {
       type: String,
       required: [true, 'branch'],
+      index: true,
     },
     sec: {
       type: String,
