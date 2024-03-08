@@ -58,8 +58,8 @@ apiRouter.use('/search', searchRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api', requireAuth, apiRouter);
 
-app.get('/api/clear-all-cache', requireAuth, clearCache);
-app.get('/api/search/clear-cache', requireAuth, clearSearchCache);
+app.get('/api/clear-all-cache', clearCache);
+app.get('/api/search/clear-cache', clearSearchCache);
 
 app.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/html');
