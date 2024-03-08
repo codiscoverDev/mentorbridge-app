@@ -1,4 +1,5 @@
 const Redis = require('ioredis');
+const { promisify } = require('util');
 const Student = require('../models/Student');
 const Mentor = require('../models/Mentor');
 require('dotenv').config();
@@ -30,6 +31,17 @@ redis.on('reconnecting', (delay, attempt) => {
   console.log(`Reconnecting to Redis... [Attempt: ${attempt}]`);
 });
 
+const flushAllCache = promisify(redis.flushall).bind(redis);
+
+const clearCache = async (req, res) => {
+  try {
+    await flushAllCache();
+    res.json({ success: true, message: 'Cache cleared successfully' });
+  } catch (error) {
+    console.error('Error while cleaning cache:', error.message);
+    res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
 
 const getCachedStudent = async (query) => {
   const cacheKey = `student:${JSON.stringify(query)}`;
@@ -80,4 +92,4 @@ const getCachedMentor = async (query) => {
   return mentor;
 };
 
-module.exports = { redis, getCachedStudent, getCachedMentor };
+module.exports = { redis, getCachedStudent, getCachedMentor, clearCache };

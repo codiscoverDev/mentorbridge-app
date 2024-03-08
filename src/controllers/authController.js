@@ -46,7 +46,7 @@ const handleErrors = (err) => {
   return message;
 };
 
-const maxAge = 3 * 24 * 60 * 60;
+const maxAge = 30 * 24 * 60 * 60;
 
 // create token
 const createToken = (id) => {
