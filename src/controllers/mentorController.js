@@ -1,5 +1,6 @@
 const Mentor = require('../models/Mentor');
-const { getCachedMentor } = require('../utils/redis');
+const { promisify } = require('util');
+const { redis, getCachedMentor } = require('../utils/redis');
 
 const getMentor = async (req, res) => {
   try {
@@ -25,35 +26,40 @@ const getMentor = async (req, res) => {
   }
 };
 
-// const searchMentors = async (req, res) => {
-//   try {
-//     const { name } = req.params;
+const updateMentor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phone, gender, department } = req.body;
 
-//     // Using a regular expression for a case-insensitive search
-//     const mentors = await Mentor.find({
-//       name: { $regex: new RegExp(name, 'i') },
-//     });
+    const mentor = await Mentor.findById(id);
 
-//     res.json({
-//       success: true,
-//       message: 'Mentors found successfully',
-//       data: mentors,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Internal server error',
-//     });
-//   }
-// };
-// Controller function to follow a mentor
+    if (name) mentor.name = name;
+    if (phone) mentor.phone = phone;
+    if (gender) mentor.gender = gender;
+    if (department) mentor.department = department;
+    const updatedMentor = await mentor.save();
+    const keys = [
+      `mentor:{"id":"${updatedMentor.id}"}`,
+      `mentor:{"email":"${updatedMentor.email}"}`,
+      `mentor:{"username":"${updatedMentor.username}"}`,
+    ];
+    const delCache = promisify(redis.del).bind(redis);
+    keys.forEach(async (key) => {
+      await delCache(key);
+    });
+
+    res.status(200).json({ success: true, mentor: updatedMentor });
+  } catch (error) {
+    console.error('Error during mentor update: ', error.message);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
 
 const followMentor = async (req, res) => {
   try {
     const { studentId, mentorId } = req.body;
 
-    // Update the student's following array with the mentorId
+    // Update the mentor's following array with the mentorId
     await Mentor.findByIdAndUpdate(studentId, {
       $addToSet: { following: mentorId },
     });
@@ -99,4 +105,4 @@ const getMentorById = async (req, res) => {
   }
 };
 
-module.exports = { getMentor, followMentor, getMentorById };
+module.exports = { getMentor, updateMentor };
