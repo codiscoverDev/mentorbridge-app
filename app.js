@@ -12,7 +12,7 @@ require('dotenv').config();
 const { requireAuth } = require('./src/middleware/authMiddleware');
 const Student = require('./src/models/Student');
 const Mentor = require('./src/models/Mentor');
-const { clearCache } = require('./src/utils/redis');
+const { clearCache, clearSearchCache } = require('./src/utils/redis');
 
 const port = 4488 || process.env.PORT;
 const dbURI = process.env.DB_URI;
@@ -58,7 +58,8 @@ apiRouter.use('/search', searchRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api', requireAuth, apiRouter);
 
-app.get('/api/clear-cache', requireAuth, clearCache);
+app.get('/api/clear-all-cache', requireAuth, clearCache);
+app.get('/api/search/clear-cache', requireAuth, clearSearchCache);
 
 app.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/html');

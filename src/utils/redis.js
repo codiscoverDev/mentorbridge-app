@@ -43,6 +43,20 @@ const clearCache = async (req, res) => {
   }
 };
 
+const clearSearchCache = async (req, res) => {
+  try {
+    const searchKeys = await redis.keys('studentSearch:*', 'mentorSearch:*');
+    if (searchKeys.length > 0) {
+      const deleteKeys = searchKeys.map((key) => redis.del(key));
+      await Promise.all(deleteKeys);
+    }
+    res.json({ success: true, message: 'Search cache cleared successfully' });
+  } catch (error) {
+    console.error('Error while clearing search cache:', error.message);
+    res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
+
 const getCachedStudent = async (query) => {
   const cacheKey = `student:${JSON.stringify(query)}`;
   let cachedData = await redis.get(cacheKey);
@@ -92,4 +106,10 @@ const getCachedMentor = async (query) => {
   return mentor;
 };
 
-module.exports = { redis, getCachedStudent, getCachedMentor, clearCache };
+module.exports = {
+  redis,
+  getCachedStudent,
+  getCachedMentor,
+  clearCache,
+  clearSearchCache,
+};
