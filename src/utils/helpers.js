@@ -2,6 +2,7 @@ const Student = require('../models/Student');
 const Mentor = require('../models/Mentor');
 const { redis } = require('../utils/redis');
 const searchTTL = 900;
+const limitCount = 10;
 
 const generateUsername = async (name, email) => {
   const minLen = 3;
@@ -75,20 +76,28 @@ const searchStudents = async (q) => {
     const cacheKey = `studentSearch:${q}`;
     const cachedData = await redis.get(cacheKey);
     if (cachedData) return JSON.parse(cachedData);
-    const students = await Student.find({
-      $or: [
-        {
-          username: { $regex: `^${q}`, $options: 'i' },
-        },
-        { name: { $regex: `.*?${q}.*?`, $options: 'i' } },
-        { email: { $regex: `^${q}`, $options: 'i' } },
-        { rollNo: { $regex: `^${q}`, $options: 'i' } },
-        { branch: { $regex: `\\b${q}\\b`, $options: 'i' } },
-      ],
-    }).sort({
-      name: -1,
-      username: -1,
-    });
+
+    let students;
+    if (q !== 'default') {
+      students = await Student.find({
+        $or: [
+          {
+            username: { $regex: `^${q}`, $options: 'i' },
+          },
+          { name: { $regex: `.*?${q}.*?`, $options: 'i' } },
+          { email: { $regex: `^${q}`, $options: 'i' } },
+          { rollNo: { $regex: `^${q}`, $options: 'i' } },
+          { branch: { $regex: `\\b${q}\\b`, $options: 'i' } },
+        ],
+      })
+        .sort({
+          name: -1,
+          username: -1,
+        })
+        .limit(limitCount);
+    } else {
+      students = await Student.find().limit(limitCount);
+    }
     redis.setex(cacheKey, searchTTL, JSON.stringify(students));
 
     return students;
@@ -101,24 +110,31 @@ const searchMentors = async (q) => {
     const cacheKey = `mentorSearch:${q}`;
     const cachedData = await redis.get(cacheKey);
     if (cachedData) return JSON.parse(cachedData);
-    const mentors = await Mentor.find({
-      $or: [
-        {
-          username: { $regex: `^${q}`, $options: 'i' },
-        },
-        { name: { $regex: `.*?${q}.*?`, $options: 'i' } },
-        { email: { $regex: `^${q}`, $options: 'i' } },
-        {
-          department: {
-            $regex: `\\b${q}\\b`,
-            $options: 'i',
+    let mentors;
+    if (q !== 'default') {
+      mentors = await Mentor.find({
+        $or: [
+          {
+            username: { $regex: `^${q}`, $options: 'i' },
           },
-        },
-      ],
-    }).sort({
-      name: -1,
-      username: -1,
-    });
+          { name: { $regex: `.*?${q}.*?`, $options: 'i' } },
+          { email: { $regex: `^${q}`, $options: 'i' } },
+          {
+            department: {
+              $regex: `\\b${q}\\b`,
+              $options: 'i',
+            },
+          },
+        ],
+      })
+        .sort({
+          name: -1,
+          username: -1,
+        })
+        .limit(limitCount);
+    } else {
+      mentors = await Mentor.find().limit(limitCount);
+    }
     redis.setex(cacheKey, searchTTL, JSON.stringify(mentors));
     return mentors;
   } catch (err) {
